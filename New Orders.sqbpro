@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/mihir/Desktop/New Orders.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1597"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,7:mainADDRESS"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="ADDRESS" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="75"/><column index="2" value="250"/><column index="3" value="218"/><column index="4" value="99"/><column index="5" value="89"/><column index="6" value="56"/><column index="7" value="60"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">SELECT PRODUCT_CLASS_CODE, PRODUCT_ID, PRODUCT_DESC, PRODUCT_PRICE, 
+CASE WHEN PRODUCT_CLASS_CODE = 2050 THEN PRODUCT_PRICE + 2000
+ WHEN PRODUCT_CLASS_CODE = 2051 THEN PRODUCT_PRICE + 500
+ WHEN PRODUCT_CLASS_CODE = 2052 THEN PRODUCT_PRICE + 600
+ ELSE PRODUCT_PRICE + 0
+ END AS price 
+ FROM PRODUCT 
+ ORDER BY PRODUCT_CLASS_CODE DESC;
+ 
+select pc.product_class_desc, p.product_id, p.product_desc, 
+case when p.product_quantity_avail = 0 then 'Out of stock' 
+     when pc.product_class_desc in ('Electronics','Computer') then
+          case when p.product_quantity_avail &lt;= 10 then 'Low stock'
+               when p.product_quantity_avail between 11 and 30 then 'In stock'
+               when p.product_quantity_avail &gt;= 31 then 'Enough stock' 
+          end
+     when pc.product_class_desc in ('Stationery','Clothes') then
+          case when p.product_quantity_avail &lt;= 20 then 'Low stock'
+               when p.product_quantity_avail between 21 and 80 then 'In stock'
+               when p.product_quantity_avail &gt;= 81 then 'Enough stock' 
+          end
+     when p.product_quantity_avail &lt;= 15 then 'Low stock'
+     when p.product_quantity_avail between 16 and 50 then 'In stock'
+     when p.product_quantity_avail &gt;= 51 then 'Enough stock' 
+     end
+from product p
+inner join product_class pc on p.PRODUCT_CLASS_CODE = pc.PRODUCT_CLASS_CODE;
+
+SELECT COUNTRY, COUNT(CITY) FROM address
+WHERE COUNTRY  NOT LIKE '%USA%' AND COUNTRY  NOT LIKE '%MALAYASIA%'
+GROUP BY COUNTRY
+HAVING COUNT(CITY)&gt;1
+ORDER BY CITY DESC;
+
+SELECT a.customer_id, (a.customer_fname || ' ' || a.customer_lname) as customer_full_name, b.city, b.pincode, c.order_id, c.order_date, f.product_class_code, e.product_desc, (d.product_quantity * e.product_price) as subtotal
+FROM online_customer a
+INNER JOIN address b
+ON a.address_id = b.address_id
+INNER JOIN order_header c
+ON c.customer_id = d.customer_id
+INNER JOIN order_items d
+ON c.order_id = d.order_id
+INNER JOIN product e
+ON d.product_id = e.product_id
+INNER JOIN product_class f
+ON e.product_class_code = f.product_class_code
+WHERE NOT INSTR(CONVERT(b.pincode as CHAR), '0')
+ORDER BY (a.customer_fname|| ' '|| a.customer_lname), c.order_date, (d.product_quantity * e.product_price)
+ 
+ SELECT PRODUCT.PRODUCT_ID,PRODUCT.PRODUCT_DESC, SUM(ORDER_ITEMS.PRODUCT_QUANTITY) as TOTALQUANTITY, 
+MAX(PRODUCT.PRODUCT_DESC) FROM PRODUCT JOIN ORDER_ITEMS ON ORDER_ITEMS.PRODUCT_ID=PRODUCT.PRODUCT_ID
+WHERE PRODUCT.PRODUCT_ID = 201
+Group by PRODUCT.PRODUCT_ID,PRODUCT.PRODUCT_DESC
+ORDER by SUM(ORDER_ITEMS.PRODUCT_QUANTITY) desc
+Limit 1
+
+SELECT
+   CUSTOMER_ID AS &quot;Customer ID&quot;,
+   (CUSTOMER_FNAME ||CUSTOMER_LNAME) AS Name,
+   CUSTOMER_EMAIL AS Email,
+   ORDER_ID AS &quot;Order ID&quot;,
+   PRODUCT_DESC AS Description,
+   PRODUCT_QUANTITY_AVAIL AS Quantity,
+   (PRODUCT_PRICE * PRODUCT_QUANTITY) AS Subtotal
+FROM online_customer
+   NATURAL LEFT JOIN order_header
+   NATURAL JOIN order_items
+   NATURAL JOIN product;
+   
+   </sql><current_tab id="0"/></tab_sql></sqlb_project>
